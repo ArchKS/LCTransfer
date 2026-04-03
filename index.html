@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互传 - 简易传输站</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink-black: #1a1a1a;
+            --paper-white: #fcfaf2;
+            --seal-red: #b22222;
+            --border-width: 2px;
+            --btn-height: 44px;
+        }
+
+        html, body {
+            background-color: var(--paper-white);
+            color: var(--ink-black);
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* 简约雕版边框 */
+        .block-border {
+            border: var(--border-width) solid var(--ink-black);
+            padding: 20px;
+            position: relative;
+            background: var(--paper-white);
+        }
+
+        .block-border::before {
+            content: "";
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid var(--ink-black);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            padding-bottom: 10px;
+            display: inline-block;
+            border-bottom: 3px double var(--ink-black);
+        }
+
+        header p {
+            margin-top: 10px;
+            letter-spacing: 4px;
+            color: var(--seal-red);
+            font-weight: bold;
+        }
+
+        /* 顶部进度条 - 简约化 */
+        .progress-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background-color: transparent;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--seal-red);
+            transition: width 0.3s ease;
+        }
+
+        /* 统一按钮样式 */
+        .btn {
+            height: var(--btn-height);
+            line-height: calc(var(--btn-height) - 6px); /* 减去边框 */
+            padding: 0 20px;
+            background: var(--paper-white);
+            color: var(--ink-black);
+            border: 2px solid var(--ink-black);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--ink-black);
+            color: var(--paper-white);
+        }
+
+        .btn-red {
+            border-color: var(--seal-red);
+            color: var(--seal-red);
+        }
+
+        .btn-red:hover {
+            background: var(--seal-red);
+            color: var(--paper-white);
+        }
+
+        /* 布局重设 - 垂直简约流 */
+        .section-card {
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-left: 5px solid var(--seal-red);
+            padding-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* 文字工具 */
+        .text-tool textarea {
+            width: 100%;
+            height: 150px;
+            background: var(--paper-white);
+            border: 2px solid var(--ink-black);
+            padding: 15px;
+            font-family: inherit;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        /* 推送列表 */
+        .pushed-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--ink-black);
+            padding: 12px 0;
+        }
+
+        .pushed-item:last-child {
+            border-bottom: none;
+        }
+
+        .pushed-item-content {
+            flex: 1;
+            padding-right: 20px;
+            word-break: break-all;
+            font-family: inherit;
+        }
+
+        .pushed-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: fit-content;
+        }
+
+        .pushed-item-time {
+            font-size: 11px;
+            color: #666;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            height: 28px;
+            padding: 0 12px;
+            font-size: 11px;
+            border: 1px solid var(--ink-black);
+            background: var(--paper-white);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .copy-btn:hover {
+            background: var(--ink-black);
+            color: var(--paper-white);
+        }
+
+        /* 吐司提示 (Toast) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--ink-black);
+            color: var(--paper-white);
+            padding: 10px 20px;
+            border-radius: 2px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 4px 4px 0 var(--seal-red);
+            border: 1px solid var(--seal-red);
+            opacity: 0;
+            transform: translateX(30px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 文件列表 */
+        #file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #file-list li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #file-list li a {
+            color: var(--ink-black);
+            text-decoration: none;
+            border-bottom: 1px solid var(--ink-black);
+            /* 防止长文件名挤压排版 */
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        .file-size {
+            font-size: 11px;
+            color: #666;
+            font-family: monospace;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        /* 底部二维码与信息 - 改造为右下角“印章” */
+        .footer-tools {
+            margin-top: 40px;
+            border-top: 1px solid var(--ink-black);
+            padding-top: 20px;
+            /* 为右下角二维码留出空间 */
+            /* padding-right: 180px; */
+        }
+
+        .qrcode-box {
+            /* position: absolute;
+            right: 15px;
+            bottom: 15px;
+            z-index: 10; */
+            /* background: white; */
+            /* border: 2px solid var(--seal-red); */
+            padding: 4px;
+            line-height: 0;
+                justify-content: flex-end;
+        }
+
+        @media (max-width: 600px) {
+            .footer-tools {
+                padding-right: 0;
+            }
+            .footer-tools {
+                display: none !important;
+                /* position: relative;
+                right: 0;
+                bottom: 0;
+                margin: 20px auto 0;
+                width: fit-content;
+                display: flex;
+                flex-direction: row;
+                align-items: center; */
+            }
+            .ip-list-container {
+                margin-right: 15px;
+            }
+        }
+
+        #qrcode {
+            display: inline-block;
+        }
+
+        #qrcode img {
+            display: block;
+        }
+
+        .upload-zone {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            right: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* IP 地址列表样式 - Checkbox 形式 */
+        .ip-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-right: 15px;
+            justify-content: center;
+        }
+
+        .ip-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-family: monospace;
+            cursor: pointer;
+            color: #444;
+            transition: all 0.2s;
+            padding: 4px 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            user-select: none;
+        }
+
+        .ip-item:hover {
+            border-color: var(--seal-red);
+            background: rgba(178, 34, 34, 0.02);
+        }
+
+        /* 模拟 Checkbox */
+        .ip-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--ink-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .ip-checkbox i {
+            display: none;
+            font-size: 12px;
+            color: white;
+        }
+
+        .ip-item.active {
+            border-color: var(--seal-red);
+            background: rgba(178, 34, 34, 0.05);
+            color: var(--seal-red);
+            font-weight: bold;
+        }
+
+        .ip-item.active .ip-checkbox {
+            background: var(--seal-red);
+            border-color: var(--seal-red);
+        }
+
+        .ip-item.active .ip-checkbox i {
+            display: block;
+        }
+    </style>
+    <script>
+        function uploadFile() {
+            const input = document.getElementById('file-input');
+            const files = input.files;
+
+            let lastLoaded = 0;
+            let lastTimeStamp = 0;
+
+            const updateProgress = (event) => {
+                const progressBar = document.getElementById('upload-progress-bar');
+                const uploadSpeedElement = document.getElementById('upload-speed');
+
+                if (event.loaded > lastLoaded) {
+                    const currentTimeStamp = Date.now();
+                    const timeElapsed = (currentTimeStamp - lastTimeStamp) / 1000; // Convert milliseconds to seconds
+                    const bytesLoaded = event.loaded - lastLoaded;
+                    const uploadSpeed = bytesLoaded / timeElapsed;
+
+                    let speedText = 'B/s';
+                    let displaySpeed = uploadSpeed;
+                    if (uploadSpeed > 1024) {
+                        displaySpeed = uploadSpeed / 1024;
+                        speedText = 'KB/s';
+                    }
+                    if (uploadSpeed > 1024 * 1024) {
+                        displaySpeed = uploadSpeed / (1024 * 1024);
+                        speedText = 'MB/s';
+                    }
+
+                    uploadSpeedElement.innerText = `Upload speed: ${displaySpeed.toFixed(2)} ${speedText}`;
+
+                    lastLoaded = event.loaded;
+                    lastTimeStamp = currentTimeStamp;
+                }
+
+                progressBar.style.width = (event.loaded / event.total) * 100 + '%';
+            };
+
+            if (files.length > 0) {
+                const formData = new FormData();
+                for (const file of files) {
+                    formData.append('files', file);
+                }
+                const uploadProgressBar = document.getElementById('upload-progress-bar');
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        updateProgress(event)
+                        const percentage = (event.loaded / event.total) * 100;
+                        uploadProgressBar.style.width = `${percentage}%`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    const data = JSON.parse(xhr.responseText);
+
+                    if (data.success) {
+                        listFiles(); // 刷新文件列表
+                        showToast('文件上传成功！');
+                    } else {
+                        showToast('上传失败: ' + data.error);
+                    }
+
+                    // 重置进度条
+                    setTimeout(() => {
+                        uploadProgressBar.style.width = '0%';
+                    }, 1000);
+                };
+
+                xhr.send(formData);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="toast-container"></div>
+    <div class="progress-wrapper">
+        <div class="progress-container">
+            <div id="upload-progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="upload-speed" style="text-align: right; font-size: 10px; padding-right: 10px;">传输速率: 0 B/s</div>
+    </div>
+
+    <div class="container">
+        <header>
+            <!-- <h1>互传</h1> -->
+            <p>● 互传 ●</p>
+        </header>
+
+        <main class="block-border">
+            <!-- 文字工具 -->
+            <section class="section-card">
+                <h3>文字传送</h3>
+                <div class="text-tool">
+                    <textarea id="text-input" placeholder="在此输入文字..."></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="save-text-button" class="btn" style="flex: 1;">保存为 TXT</button>
+                        <button id="push-text-button" class="btn" style="flex: 1;">发布到页面</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 实时推送 -->
+            <section id="pushed-message-area" class="section-card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">实时推送 (最近6条)</h3>
+                    <button id="clear-pushed-button" class="copy-btn btn-red" style="height: 32px; padding: 0 15px;">一键清除</button>
+                </div>
+                <div id="pushed-list"></div>
+            </section>
+
+            <!-- 文件归档 -->
+            <section class="section-card">
+                <h3>文件归档</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div class="upload-zone btn" style="flex: 1;">
+                        上传文件
+                        <input type="file" id="file-input" multiple>
+                    </div>
+                    <button id="delete-button" class="btn btn-red" style="flex: 1;">清空全部</button>
+                </div>
+                <ul id="file-list"></ul>
+            </section>
+
+            <!-- 底部二维码与连接 -->
+            <footer class="footer-tools">
+                <div>
+                    <p style="font-size: 14px;"><strong>连接提示：</strong><br>确保手机与电脑处于同一局域网下，即可通过右侧二维码或当前网页地址访问此站点。</p>
+                </div>
+                <div class="qrcode-box" style="display: flex; align-items: stretch;">
+                    <div id="ip-list" class="ip-list-container">
+                        <!-- IP addresses will be listed here -->
+                    </div>
+                    <div id="qrcode"></div>
+                </div>
+            </footer>
+        </main>
+    </div>
+</body>
+
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function listFiles() {
+        const response = await fetch('/list_files');
+        const files = await response.json();
+        const fileList = document.getElementById('file-list');
+
+        fileList.innerHTML = '';
+
+        files.forEach(file => {
+            const listItem = document.createElement('li');
+            
+            const link = document.createElement('a');
+            link.href = `/download/${file.name}`;
+            link.innerText = file.name;
+
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'file-size';
+            sizeSpan.innerText = formatFileSize(file.size);
+
+            listItem.appendChild(link);
+            listItem.appendChild(sizeSpan);
+            fileList.appendChild(listItem);
+        });
+    }
+
+    let qrcodeInstance = null;
+    const generatorQrCode = (url) => {
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = ''; // 清空之前的
+        const targetUrl = url || window.location.href;
+        qrcodeInstance = new QRCode(qrContainer, {
+            text: targetUrl,
+            width: 130,
+            height: 130,
+            colorDark: "#1a1a1a",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    async function fetchIps() {
+        try {
+            const response = await fetch('/get_ips');
+            const ips = await response.json();
+            const ipListContainer = document.getElementById('ip-list');
+            ipListContainer.innerHTML = '';
+            
+            const currentHost = window.location.hostname;
+            const port = window.location.port;
+
+            ips.forEach(ip => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'ip-item';
+                if (ip === currentHost) itemDiv.classList.add('active');
+                
+                // Checkbox 容器
+                const checkbox = document.createElement('div');
+                checkbox.className = 'ip-checkbox';
+                checkbox.innerHTML = '<i class="fas fa-check"></i>';
+                
+                // 文字内容
+                const label = document.createElement('span');
+                label.innerText = ip;
+                
+                itemDiv.appendChild(checkbox);
+                itemDiv.appendChild(label);
+
+                itemDiv.onclick = () => {
+                    // 更新所有项目的状态
+                    document.querySelectorAll('.ip-item').forEach(el => el.classList.remove('active'));
+                    itemDiv.classList.add('active');
+                    
+                    // 更新二维码
+                    const newUrl = `${window.location.protocol}//${ip}${port ? ':' + port : ''}`;
+                    generatorQrCode(newUrl);
+                    showToast(`已切换至: ${ip}`);
+                };
+                ipListContainer.appendChild(itemDiv);
+            });
+        } catch (error) {
+            console.error('Error fetching IPs:', error);
+        }
+    }
+
+    const processDelBtn = () => {
+        // 处理 "Delete" 按钮的点击事件
+        const deleteButton = document.getElementById('delete-button');
+        deleteButton.addEventListener('click', async () => {
+            if(!confirm('确定要清空全部文件吗？')) return;
+            try {
+                const response = await fetch('/delete', { method: 'POST' });
+                const data = await response.json();
+                listFiles();
+                showToast('已清空全部文件');
+            } catch (error) {
+                console.error('Error while deleting files:', error);
+                showToast('清空失败');
+            }
+        });
+    }
+
+    const processClearPushedBtn = () => {
+        const clearButton = document.getElementById('clear-pushed-button');
+        clearButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/clear_pushed_text', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('已清除推送消息');
+                    renderPushedList([]); // 清空显示
+                } else {
+                    showToast('清空失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error while clearing pushed text:', error);
+                showToast('服务器连接失败');
+            }
+        });
+    }
+
+    const showToast = (msg) => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        
+        // 触发重绘以运行动画
+        toast.offsetHeight;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                container.removeChild(toast);
+            }, 300);
+        }, 1000);
+    }
+
+    const processSaveTextBtn = () => {
+        const saveTextButton = document.getElementById('save-text-button');
+        saveTextButton.addEventListener('click', async () => {
+            const textInput = document.getElementById('text-input');
+            const text = textInput.value.trim();
+            if (!text) {
+                showToast('请先输入文字');
+                return;
+            }
+            try {
+                const response = await fetch('/save_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('文字已存为 TXT！');
+                    textInput.value = ''; // 清空输入框
+                    listFiles(); // 刷新文件列表
+                } else {
+                    showToast('保存失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error while saving text:', error);
+                showToast('服务器连接失败');
+            }
+        });
+    }
+
+    const copyToClipboard = (text, btn) => {
+        const performCopy = () => {
+            showToast('已复制到剪切板');
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(performCopy).catch(err => {
+                fallbackCopy(text, performCopy);
+            });
+        } else {
+            fallbackCopy(text, performCopy);
+        }
+    }
+
+    const fallbackCopy = (text, callback) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // 确保 textarea 在屏幕外且不可见
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                callback();
+            } else {
+                console.error('fallbackCopy 失败');
+            }
+        } catch (err) {
+            console.error('fallbackCopy 抛出异常: ', err);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    const renderPushedList = (list) => {
+        const area = document.getElementById('pushed-message-area');
+        const listContainer = document.getElementById('pushed-list');
+        
+        if (list && list.length > 0) {
+            area.style.display = 'block';
+            listContainer.innerHTML = '';
+            
+            list.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'pushed-item';
+                
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'pushed-item-content';
+                contentSpan.innerText = item.text;
+                
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'pushed-item-meta';
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'pushed-item-time';
+                timeSpan.innerText = item.timestamp;
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerText = '复制';
+                copyBtn.onclick = () => copyToClipboard(item.text, copyBtn);
+                
+                metaDiv.appendChild(timeSpan);
+                metaDiv.appendChild(copyBtn);
+                
+                div.appendChild(contentSpan);
+                div.appendChild(metaDiv);
+                listContainer.appendChild(div);
+            });
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
+    const processPushTextBtn = () => {
+        const pushTextButton = document.getElementById('push-text-button');
+        pushTextButton.addEventListener('click', async () => {
+            const textInput = document.getElementById('text-input');
+            const text = textInput.value.trim();
+            if (!text) {
+                showToast('请先输入文字');
+                return;
+            }
+            try {
+                const response = await fetch('/push_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    textInput.value = ''; // 清空输入框
+                    fetchPushedText(); // 立即更新
+                    showToast('推送成功！');
+                } else {
+                    showToast('推送失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error while pushing text:', error);
+                showToast('服务器连接失败');
+            }
+        });
+    }
+
+    async function fetchPushedText() {
+        try {
+            const response = await fetch('/get_pushed_text');
+            const data = await response.json();
+            renderPushedList(data);
+        } catch (error) {
+            console.error('Error fetching pushed text:', error);
+        }
+    }
+
+    // 当页面加载时，显示文件列表
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('file-input');
+        fileInput.addEventListener('change', uploadFile);
+        generatorQrCode();
+        fetchIps(); // 获取 IP 列表
+        processDelBtn();
+        processClearPushedBtn();
+        processSaveTextBtn();
+        processPushTextBtn();
+        listFiles();
+        fetchPushedText();
+
+        // 使用 Socket.IO 实现主动刷新
+        const socket = io();
+        socket.on('refresh_pushed_text', (data) => {
+            console.log('Received push update:', data);
+            renderPushedList(data);
+        });
+
+        socket.on('refresh_files', () => {
+            console.log('Received files update');
+            listFiles();
+        });
+    });
+</script>
