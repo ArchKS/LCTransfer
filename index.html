@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>互传 - 简易传输站</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./all.min.css">
+    <link href="./css2.css" rel="stylesheet">
     <style>
         :root {
             --ink-black: #1a1a1a;
@@ -146,11 +146,12 @@
             background: var(--paper-white);
             border: 2px solid var(--ink-black);
             padding: 15px;
-            font-family: inherit;
+            font-family: "Cascadia Code", "Consolas", "Monaco", "Courier New", monospace;
             font-size: 16px;
             box-sizing: border-box;
             margin-bottom: 15px;
             resize: vertical;
+            tab-size: 4;
         }
 
         /* 推送列表 */
@@ -167,17 +168,103 @@
         }
 
         .pushed-item-content {
+            display: block;
             flex: 1;
             padding-right: 20px;
-            word-break: break-all;
-            font-family: inherit;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            font-family: "Cascadia Code", "Consolas", "Monaco", "Courier New", monospace;
+            white-space: pre-wrap;
+            tab-size: 4;
+            font-size: 14px;
+            background: rgba(0,0,0,0.05);
+            padding: 12px;
+            border-radius: 4px;
+            line-height: 1.5;
+            max-height: 20vh;
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+
+        .pushed-item-content::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
         }
 
         .pushed-item-meta {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
             min-width: fit-content;
+            margin-left: 15px;
+        }
+
+        .show-btn {
+            height: 28px;
+            padding: 0 12px;
+            font-size: 11px;
+            border: 1px solid var(--seal-red);
+            background: var(--paper-white);
+            color: var(--seal-red);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .show-btn:hover {
+            background: var(--seal-red);
+            color: var(--paper-white);
+        }
+
+        /* 全文展示侧栏 */
+        #full-text-overlay {
+            position: fixed;
+            top: 75px;
+            right: -100%;
+            width: 30%;
+            height: 90vh;
+            background: var(--paper-white);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            /* border-left: 3px solid var(--ink-black); */
+        }
+
+        #full-text-overlay.active {
+            right: 0;
+        }
+
+        .overlay-header {
+            padding: 10px 10px;
+            /* border-bottom: 2px solid var(--ink-black); */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* background: var(--ink-black); */
+            /* color: var(--paper-white); */
+            border-left: 5px solid var(--seal-red);
+        }
+
+        .overlay-content {
+            flex: 1;
+            padding: 10px;
+            margin: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: "Cascadia Code", "Consolas", "Monaco", "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            tab-size: 4;
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 800px) {
+            #full-text-overlay {
+                width: 85%;
+            }
         }
 
         .pushed-item-time {
@@ -494,7 +581,7 @@
                 <div class="text-tool">
                     <textarea id="text-input" placeholder="在此输入文字..."></textarea>
                     <div style="display: flex; gap: 10px;">
-                        <button id="save-text-button" class="btn" style="flex: 1;">保存为 TXT</button>
+                        <button id="save-text-button" class="btn" style="flex: 1;">保存文本</button>
                         <button id="push-text-button" class="btn" style="flex: 1;">发布到页面</button>
                     </div>
                 </div>
@@ -536,11 +623,20 @@
             </footer>
         </main>
     </div>
+
+    <!-- 全文展示面板 -->
+    <div id="full-text-overlay">
+        <div class="overlay-header">
+            <span style="font-weight: bold; letter-spacing: 2px;">全文展示</span>
+            <button onclick="closeFullText()" class="copy-btn" style="background: transparent; color: #b22222; border-color: black;">关闭</button>
+        </div>
+        <div id="overlay-content" class="overlay-content"></div>
+    </div>
 </body>
 
 </html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script src="./qrcode.min.js"></script>
+<script src="./socket.io.js"></script>
 <script>
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 B';
@@ -692,11 +788,21 @@
         const saveTextButton = document.getElementById('save-text-button');
         saveTextButton.addEventListener('click', async () => {
             const textInput = document.getElementById('text-input');
-            const text = textInput.value.trim();
-            if (!text) {
+            let text = textInput.value;
+            if (!text.trim()) {
                 showToast('请先输入文字');
                 return;
             }
+
+            // 检查是否为 JSON 并格式化
+            try {
+                const trimmed = text.trim();
+                if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                    const jsonObj = JSON.parse(trimmed);
+                    text = JSON.stringify(jsonObj, null, 4);
+                }
+            } catch (e) {}
+
             try {
                 const response = await fetch('/save_text', {
                     method: 'POST',
@@ -761,6 +867,19 @@
         document.body.removeChild(textArea);
     }
 
+    const showFullText = (text) => {
+        const overlay = document.getElementById('full-text-overlay');
+        const content = document.getElementById('overlay-content');
+        
+        content.innerText = text;
+        overlay.classList.add('active');
+    }
+
+    const closeFullText = () => {
+        const overlay = document.getElementById('full-text-overlay');
+        overlay.classList.remove('active');
+    }
+
     const renderPushedList = (list) => {
         const area = document.getElementById('pushed-message-area');
         const listContainer = document.getElementById('pushed-list');
@@ -773,9 +892,20 @@
                 const div = document.createElement('div');
                 div.className = 'pushed-item';
                 
-                const contentSpan = document.createElement('span');
-                contentSpan.className = 'pushed-item-content';
-                contentSpan.innerText = item.text;
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'pushed-item-content';
+                
+                let displayPath = item.text;
+                // 尝试在展示时也进行 JSON 格式化
+                try {
+                    const trimmed = displayPath.trim();
+                    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                        const jsonObj = JSON.parse(trimmed);
+                        displayPath = JSON.stringify(jsonObj, null, 4);
+                    }
+                } catch (e) {}
+                
+                contentDiv.innerText = displayPath;
                 
                 const metaDiv = document.createElement('div');
                 metaDiv.className = 'pushed-item-meta';
@@ -787,14 +917,25 @@
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'copy-btn';
                 copyBtn.innerText = '复制';
-                copyBtn.onclick = () => copyToClipboard(item.text, copyBtn);
+                copyBtn.onclick = () => copyToClipboard(displayPath, copyBtn);
                 
                 metaDiv.appendChild(timeSpan);
                 metaDiv.appendChild(copyBtn);
                 
-                div.appendChild(contentSpan);
+                div.appendChild(contentDiv);
                 div.appendChild(metaDiv);
                 listContainer.appendChild(div);
+
+                // 在添加到 DOM 后检测是否溢出
+                setTimeout(() => {
+                    if (contentDiv.scrollHeight > contentDiv.clientHeight) {
+                        const showBtn = document.createElement('button');
+                        showBtn.className = 'show-btn';
+                        showBtn.innerText = '查看';
+                        showBtn.onclick = () => showFullText(displayPath);
+                        metaDiv.appendChild(showBtn);
+                    }
+                }, 0);
             });
         } else {
             area.style.display = 'none';
@@ -805,11 +946,21 @@
         const pushTextButton = document.getElementById('push-text-button');
         pushTextButton.addEventListener('click', async () => {
             const textInput = document.getElementById('text-input');
-            const text = textInput.value.trim();
-            if (!text) {
+            let text = textInput.value;
+            if (!text.trim()) {
                 showToast('请先输入文字');
                 return;
             }
+
+            // 检查是否为 JSON 并格式化
+            try {
+                const trimmed = text.trim();
+                if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                    const jsonObj = JSON.parse(trimmed);
+                    text = JSON.stringify(jsonObj, null, 4);
+                }
+            } catch (e) {}
+
             try {
                 const response = await fetch('/push_text', {
                     method: 'POST',
@@ -847,6 +998,19 @@
     document.addEventListener('DOMContentLoaded', () => {
         const fileInput = document.getElementById('file-input');
         fileInput.addEventListener('change', uploadFile);
+
+        // 允许在文本框中输入 Tab 键
+        const textInput = document.getElementById('text-input');
+        textInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 1;
+            }
+        });
+
         generatorQrCode();
         fetchIps(); // 获取 IP 列表
         processDelBtn();

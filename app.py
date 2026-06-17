@@ -85,8 +85,20 @@ def save_text():
     if not text:
         return jsonify(success=False, error='No text provided'), 400
     
+    # 智能检测是否为 JSON 格式以决定后缀名
+    extension = "txt"
+    try:
+        # 尝试解析文本
+        parsed_data = json.loads(text)
+        # 只有当它是对象或数组时，我们才将其保存为 .json
+        if isinstance(parsed_data, (dict, list)):
+            extension = "json"
+    except Exception:
+        # 解析失败则保持为 .txt
+        pass
+
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"text_{timestamp}.txt"
+    filename = f"text_{timestamp}.{extension}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(text)

@@ -1,18 +1,18 @@
 @echo off
 echo.
 echo ===========================================
-echo       正在进行清理旧的打包文件...
+echo      Clean Old Package...
 echo ===========================================
 echo.
 
 :: 清理旧的打包文件夹和 spec 文件
 if exist "dist" rd /s /q "dist"
 if exist "build" rd /s /q "build"
-if exist "LocalFileTransfer.spec" del /q "LocalFileTransfer.spec"
+if exist "LCTransfer.spec" del /q "LCTransfer.spec"
 
 echo.
 echo ===========================================
-echo       正在打包为可执行文件 (EXE)
+echo       Making Executable File (EXE)
 echo ===========================================
 echo.
 
@@ -23,9 +23,9 @@ pip install pyinstaller
 set ICON_CMD=
 if exist "icon.ico" (
     set ICON_CMD=--icon="icon.ico"
-    echo 使用自定义图标: icon.ico
+    echo Use custom icon: icon.ico
 ) else (
-    echo [提示] 未找到 icon.ico，使用系统默认图标
+    echo [Tip] Can not find icon.ico, Use Default Icon
 )
 
 :: 打包命令
@@ -37,24 +37,34 @@ if exist "icon.ico" (
 pyinstaller --onefile ^
             --clean ^
             --add-data "index.html;." ^
+            --add-data "qrcode.min.js;." ^
+            --add-data "socket.io.js;." ^
+            --add-data "all.min.css;." ^
+            --add-data "css2.css;." ^
             --hidden-import engineio.async_drivers.threading ^
             %ICON_CMD% ^
-            --name LocalFileTransfer ^
+            --name LCTransfer ^
             app.py
 
 echo.
 echo ===========================================
-echo 打包完成！请在 "dist" 文件夹中查找 LocalFileTransfer.exe
+echo Package Finish! Please Find LCTransfer.exe in "dist" Folder
 echo ===========================================
 echo.
-echo [注意] 如果你看到图标没变，可能是 Windows 图标缓存导致的。
-echo 请尝试将生成的 EXE 文件移动到另一个文件夹，或者重启资源管理器。
+echo [Note] If you see the icon hasn't changed, it might be due to Windows icon cache.
+echo Please try moving the generated EXE file to another folder, or restart Explorer.
 echo.
 pause
 
 echo.
 echo ===========================================
-echo 打包完成！请在 "dist" 文件夹中查找 LocalFileTransfer.exe
+echo Package Finish! Please Find LCTransfer.exe in "dist" Folder
 echo ===========================================
 echo.
 pause
+
+
+:: 清理旧的打包文件夹和 spec 文件
+@REM if exist "dist" rd /s /q "dist"
+if exist "build" rd /s /q "build"
+if exist "LCTransfer.spec" del /q "LCTransfer.spec"
