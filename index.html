@@ -659,6 +659,7 @@
             const link = document.createElement('a');
             link.href = `/download/${file.name}`;
             link.innerText = file.name;
+            link.setAttribute('download', file.name);
 
             const sizeSpan = document.createElement('span');
             sizeSpan.className = 'file-size';

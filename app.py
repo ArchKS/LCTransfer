@@ -17,7 +17,16 @@ def resource_path(relative_path):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
-UPLOAD_FOLDER = './uploads'
+# 获取程序所在目录（打包后为 exe 所在目录，开发时为脚本所在目录）
+def base_dir():
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 打包后：使用 exe 所在目录
+        return os.path.dirname(sys.executable)
+    # 开发环境：使用脚本所在目录
+    return os.path.dirname(os.path.abspath(__file__))
+
+# 使用绝对路径，避免依赖当前工作目录（CWD）
+UPLOAD_FOLDER = os.path.join(base_dir(), 'uploads')
 # 使用 resource_path('.') 作为静态资源目录
 app = Flask(__name__, static_folder=resource_path("."), static_url_path="")
 # app = Flask(__name__)
@@ -34,7 +43,7 @@ def index():
 
 @app.route('/download/<path:filename>', methods=['GET'])
 def download_file(filename):
-    return send_from_directory(directory=Path(app.config['UPLOAD_FOLDER']), path=filename)
+    return send_from_directory(directory=Path(app.config['UPLOAD_FOLDER']), path=filename, as_attachment=True)
 
 
 @app.route('/list_files', methods=['GET'])
