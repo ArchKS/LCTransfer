@@ -9,6 +9,8 @@ from threading import Thread
 from datetime import datetime
 from flask_socketio import SocketIO, emit
 import sys
+import uuid
+import re
 
 # 处理 PyInstaller 资源路径
 def resource_path(relative_path):
@@ -27,12 +29,18 @@ def base_dir():
 
 # 使用绝对路径，避免依赖当前工作目录（CWD）
 UPLOAD_FOLDER = os.path.join(base_dir(), 'uploads')
+PASTED_IMAGE_FOLDER = os.path.join(base_dir(), 'pasted_images')
 # 使用 resource_path('.') 作为静态资源目录
 app = Flask(__name__, static_folder=resource_path("."), static_url_path="")
 # app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PASTED_IMAGE_FOLDER'] = PASTED_IMAGE_FOLDER
 CORS(app)  # 添加这一行
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# 路由在测试或被其他模块导入时也需要这两个目录存在。
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(PASTED_IMAGE_FOLDER, exist_ok=True)
 
 # 用于存储推送的文本列表（最多6条）
 pushed_data_list = []
@@ -58,6 +66,110 @@ def list_files():
                 "size": os.path.getsize(filepath)
             })
     return json.dumps(files_info)
+
+
+def detect_image_extension(data):
+    """仅接受浏览器可直接展示的常见位图，不信任客户端传来的文件名。"""
+    if data.startswith(b'\x89PNG\r\n\x1a\n'):
+        return 'png'
+    if data.startswith(b'\xff\xd8\xff'):
+        return 'jpg'
+    if data.startswith((b'GIF87a', b'GIF89a')):
+        return 'gif'
+    if len(data) >= 12 and data.startswith(b'RIFF') and data[8:12] == b'WEBP':
+        return 'webp'
+    if data.startswith(b'BM'):
+        return 'bmp'
+    return None
+
+
+def is_pasted_image_filename(filename):
+    return re.fullmatch(r'[0-9a-f]{32}\.(png|jpg|gif|webp|bmp)', filename) is not None
+
+
+@app.route('/images', methods=['GET'])
+def list_pasted_images():
+    image_folder = app.config['PASTED_IMAGE_FOLDER']
+    images = []
+    for filename in os.listdir(image_folder):
+        if not is_pasted_image_filename(filename):
+            continue
+        filepath = os.path.join(image_folder, filename)
+        if not os.path.isfile(filepath):
+            continue
+        try:
+            images.append({
+                'id': filename,
+                'url': url_for('get_pasted_image', filename=filename),
+                'created_at': os.path.getmtime(filepath)
+            })
+        except FileNotFoundError:
+            # 另一个浏览器可能刚好在列表刷新期间删除了该图片。
+            continue
+    images.sort(key=lambda image: image['created_at'], reverse=True)
+    return jsonify(images)
+
+
+@app.route('/images/<path:filename>', methods=['GET'])
+def get_pasted_image(filename):
+    return send_from_directory(app.config['PASTED_IMAGE_FOLDER'], filename)
+
+
+@app.route('/images', methods=['POST'])
+def upload_pasted_images():
+    files = request.files.getlist('images')
+    if not files:
+        return jsonify(success=False, error='剪贴板中没有图片'), 400
+
+    pending_images = []
+    total_size = 0
+    max_image_size = 20 * 1024 * 1024
+    saved_images = []
+    for image in files:
+        # 单张限制 20 MB，避免误粘贴过大内容占满内存。
+        data = image.read(max_image_size + 1)
+        if len(data) > max_image_size:
+            return jsonify(success=False, error='单张图片不能超过 20 MB'), 413
+
+        extension = detect_image_extension(data)
+        if not extension:
+            return jsonify(success=False, error='仅支持 PNG、JPEG、GIF、WebP 或 BMP 图片'), 400
+
+        total_size += len(data)
+        if total_size > 60 * 1024 * 1024:
+            return jsonify(success=False, error='一次粘贴的图片总大小不能超过 60 MB'), 413
+        pending_images.append((data, extension))
+
+    # 全部图片验证通过后再落盘，避免一次粘贴只保存了一部分。
+    for data, extension in pending_images:
+        filename = f'{uuid.uuid4().hex}.{extension}'
+        filepath = os.path.join(app.config['PASTED_IMAGE_FOLDER'], filename)
+        temp_filepath = f'{filepath}.tmp'
+        with open(temp_filepath, 'wb') as image_file:
+            image_file.write(data)
+        os.replace(temp_filepath, filepath)
+        saved_images.append({
+            'id': filename,
+            'url': url_for('get_pasted_image', filename=filename)
+        })
+
+    socketio.emit('refresh_images')
+    return jsonify(success=True, images=saved_images)
+
+
+@app.route('/images/<path:filename>', methods=['DELETE'])
+def delete_pasted_image(filename):
+    # 只允许删除由服务端生成的单层文件名。
+    if filename != os.path.basename(filename) or not is_pasted_image_filename(filename):
+        return jsonify(success=False, error='无效的图片名称'), 400
+
+    filepath = os.path.join(app.config['PASTED_IMAGE_FOLDER'], filename)
+    if not os.path.isfile(filepath):
+        return jsonify(success=False, error='图片不存在'), 404
+
+    os.unlink(filepath)
+    socketio.emit('refresh_images')
+    return jsonify(success=True)
 
 
 
