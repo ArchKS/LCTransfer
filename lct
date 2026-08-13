@@ -1,0 +1,15 @@
+#!/bin/sh
+
+PROJECT_DIR="/Users/zendu/Desktop/LCTransfer"
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "lct: 未找到 python3，请先安装 Python 3。" >&2
+    exit 1
+fi
+
+cd "$PROJECT_DIR" || {
+    echo "lct: 无法进入项目目录 $PROJECT_DIR" >&2
+    exit 1
+}
+
+exec python3 app.py

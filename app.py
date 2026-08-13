@@ -17,7 +17,8 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
+    # 从任意目录通过 lct 启动时，仍以 app.py 所在目录定位静态资源。
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
 # 获取程序所在目录（打包后为 exe 所在目录，开发时为脚本所在目录）
 def base_dir():
