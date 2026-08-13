@@ -2,7 +2,7 @@
 
 LCTransfer 是一个轻量的局域网文件与文本传输工具。程序在电脑上启动一个 Web 服务，同一局域网内的手机、平板和其他电脑可以通过浏览器访问，用于传递文字、文件和剪贴板图片。
 
-![LCTransfer 页面预览](./screenshot.png)
+![LCTransfer 页面预览](./screenshot2.png)
 
 ## 功能
 
