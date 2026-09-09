@@ -556,41 +556,34 @@
         }
     </style>
     <script>
+        // ai coding: 增加上传过程中的实时速率与完成后的总平均速率计算 2026/09/09: 14:28
         function uploadFile() {
             const input = document.getElementById('file-input');
             const files = input.files;
 
-            let lastLoaded = 0;
-            let lastTimeStamp = 0;
+            const formatTransferSpeed = (bytesPerSecond) => {
+                const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+                let unitIndex = 0;
+                let displaySpeed = bytesPerSecond;
+                while (displaySpeed >= 1024 && unitIndex < units.length - 1) {
+                    displaySpeed /= 1024;
+                    unitIndex += 1;
+                }
+                return `${displaySpeed.toFixed(2)} ${units[unitIndex]}`;
+            };
 
-            const updateProgress = (event) => {
+            const updateProgress = (event, uploadStartTime) => {
                 const progressBar = document.getElementById('upload-progress-bar');
                 const uploadSpeedElement = document.getElementById('upload-speed');
 
-                if (event.loaded > lastLoaded) {
-                    const currentTimeStamp = Date.now();
-                    const timeElapsed = (currentTimeStamp - lastTimeStamp) / 1000; // Convert milliseconds to seconds
-                    const bytesLoaded = event.loaded - lastLoaded;
-                    const uploadSpeed = bytesLoaded / timeElapsed;
-
-                    let speedText = 'B/s';
-                    let displaySpeed = uploadSpeed;
-                    if (uploadSpeed > 1024) {
-                        displaySpeed = uploadSpeed / 1024;
-                        speedText = 'KB/s';
-                    }
-                    if (uploadSpeed > 1024 * 1024) {
-                        displaySpeed = uploadSpeed / (1024 * 1024);
-                        speedText = 'MB/s';
-                    }
-
-                    uploadSpeedElement.innerText = `Upload speed: ${displaySpeed.toFixed(2)} ${speedText}`;
-
-                    lastLoaded = event.loaded;
-                    lastTimeStamp = currentTimeStamp;
+                if (event.lengthComputable) {
+                    progressBar.style.width = `${(event.loaded / event.total) * 100}%`;
                 }
 
-                progressBar.style.width = (event.loaded / event.total) * 100 + '%';
+                const elapsedSeconds = (Date.now() - uploadStartTime) / 1000;
+                if (event.loaded > 0 && elapsedSeconds > 0) {
+                    uploadSpeedElement.innerText = `当前速率: ${formatTransferSpeed(event.loaded / elapsedSeconds)}`;
+                }
             };
 
             if (files.length > 0) {
@@ -599,25 +592,36 @@
                     formData.append('files', file);
                 }
                 const uploadProgressBar = document.getElementById('upload-progress-bar');
+                const uploadSpeedElement = document.getElementById('upload-speed');
+                const uploadStartTime = Date.now();
+                const totalBytes = Array.from(files).reduce((sum, file) => sum + file.size, 0);
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', '/upload', true);
 
                 xhr.upload.onprogress = (event) => {
                     if (event.lengthComputable) {
-                        updateProgress(event)
-                        const percentage = (event.loaded / event.total) * 100;
-                        uploadProgressBar.style.width = `${percentage}%`;
+                        updateProgress(event, uploadStartTime);
                     }
                 };
 
                 xhr.onload = () => {
-                    const data = JSON.parse(xhr.responseText);
+                    let data;
+                    try {
+                        data = JSON.parse(xhr.responseText);
+                    } catch (error) {
+                        data = { success: false, error: '服务器返回无效响应' };
+                    }
 
                     if (data.success) {
+                        const elapsedSeconds = (Date.now() - uploadStartTime) / 1000;
+                        const averageSpeed = elapsedSeconds > 0 ? totalBytes / elapsedSeconds : totalBytes;
+                        uploadSpeedElement.innerText = `平均速率: ${formatTransferSpeed(averageSpeed)}`;
+                        uploadProgressBar.style.width = '100%';
                         listFiles(); // 刷新文件列表
                         showToast('文件上传成功！');
                     } else {
+                        uploadSpeedElement.innerText = '传输速率: 0 B/s';
                         showToast('上传失败: ' + data.error);
                     }
 
@@ -625,6 +629,12 @@
                     setTimeout(() => {
                         uploadProgressBar.style.width = '0%';
                     }, 1000);
+                };
+
+                xhr.onerror = () => {
+                    uploadSpeedElement.innerText = '传输速率: 0 B/s';
+                    showToast('上传失败：网络连接错误');
+                    uploadProgressBar.style.width = '0%';
                 };
 
                 xhr.send(formData);
