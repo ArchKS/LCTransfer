@@ -402,18 +402,106 @@
             display: block;
         }
 
-        .upload-zone {
-            position: relative;
-            overflow: hidden;
+        /* ai coding: 底部“复制关闭下载拦截设置地址”入口的弱化样式 2026/09/18: 19:57 */
+        .download-help {
+            text-align: center;
+            margin: 0 auto 30px;
+            max-width: 800px;
+            padding: 0 20px;
         }
 
-        .upload-zone input[type="file"] {
+        .download-help span {
+            font-size: 11px;
+            color: #999;
+            opacity: 0.45;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+
+        .download-help span:hover {
+            opacity: 0.9;
+            text-decoration: underline;
+        }
+
+        /* ai coding: 上传框改为图标与提示词同行横向排列，使提示词垂直居中 2026/09/18: 19:51 */
+        .upload-dropbox {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 140px;
+            border: 2px dashed var(--ink-black);
+            background: rgba(0, 0, 0, 0.02);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-dropbox:hover {
+            border-color: var(--seal-red);
+            background: rgba(178, 34, 34, 0.04);
+        }
+
+        .upload-dropbox input[type="file"] {
             position: absolute;
-            font-size: 100px;
-            right: 0;
             top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             opacity: 0;
             cursor: pointer;
+        }
+
+        .upload-dropbox-icon {
+            font-size: 28px;
+            color: var(--seal-red);
+            line-height: 1;
+        }
+
+        .upload-dropbox-text {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* ai coding: 拖拽上传时的高亮样式与全屏提示层 2026/09/18: 19:39 */
+        .upload-dropbox.drag-active {
+            background: var(--ink-black);
+            border-color: var(--ink-black);
+        }
+
+        .upload-dropbox.drag-active .upload-dropbox-icon,
+        .upload-dropbox.drag-active .upload-dropbox-text {
+            color: var(--paper-white);
+        }
+
+        #drop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(252, 250, 242, 0.92);
+            border: 4px dashed var(--seal-red);
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        #drop-overlay.active {
+            display: flex;
+        }
+
+        #drop-overlay span {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--seal-red);
+            letter-spacing: 4px;
         }
 
         /* 粘贴图片 */
@@ -557,10 +645,8 @@
     </style>
     <script>
         // ai coding: 增加上传过程中的实时速率与完成后的总平均速率计算 2026/09/09: 14:28
-        function uploadFile() {
-            const input = document.getElementById('file-input');
-            const files = input.files;
-
+        // ai coding: 抽出 uploadFiles 以便点击选择与拖拽上传共用同一套上传逻辑 2026/09/18: 19:39
+        function uploadFiles(files) {
             const formatTransferSpeed = (bytesPerSecond) => {
                 const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
                 let unitIndex = 0;
@@ -640,11 +726,19 @@
                 xhr.send(formData);
             }
         }
+
+        // ai coding: 点击文件输入框时继续复用 uploadFiles 2026/09/18: 19:39
+        function uploadFile() {
+            const input = document.getElementById('file-input');
+            uploadFiles(input.files);
+        }
     </script>
 </head>
 
 <body>
     <div id="toast-container"></div>
+    <!-- ai coding: 拖拽文件到页面时显示的全屏提示层 2026/09/18: 19:39 -->
+    <div id="drop-overlay"><span>松开鼠标即可上传文件</span></div>
     <div class="progress-wrapper">
         <div class="progress-container">
             <div id="upload-progress-bar" class="progress-bar"></div>
@@ -691,13 +785,15 @@
 
             <!-- 文件归档 -->
             <section class="section-card">
-                <h3>文件归档</h3>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <div class="upload-zone btn" style="flex: 1;">
-                        上传文件
-                        <input type="file" id="file-input" multiple>
-                    </div>
-                    <button id="delete-button" class="btn btn-red" style="flex: 1;">清空全部</button>
+                <!-- ai coding: 标题右侧放“清除全部”，下方改为支持点击与拖拽的上传框 2026/09/18: 19:45 -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">文件归档</h3>
+                    <button id="delete-button" class="copy-btn btn-red" style="height: 32px; padding: 0 15px;">清除全部</button>
+                </div>
+                <div id="upload-dropbox" class="upload-dropbox" style="margin-bottom: 15px;">
+                    <div class="upload-dropbox-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-dropbox-text">点击选择文件，或将文件拖拽到此处上传</div>
+                    <input type="file" id="file-input" multiple>
                 </div>
                 <ul id="file-list"></ul>
             </section>
@@ -715,6 +811,11 @@
                 </div>
             </footer>
         </main>
+    </div>
+
+    <!-- ai coding: 页面底部增加不显眼的入口，点击复制浏览器关闭下载拦截的设置地址 2026/09/18: 19:57 -->
+    <div class="download-help">
+        <span id="download-help-link" title="复制浏览器设置地址，粘贴到地址栏即可打开">下载被拦截？点此复制关闭地址</span>
     </div>
 
     <!-- 全文展示面板 -->
@@ -1050,6 +1151,27 @@
         document.body.removeChild(textArea);
     }
 
+    // ai coding: 识别当前浏览器并返回关闭/管理不安全下载提示的设置地址 2026/09/18: 19:57
+    const getDownloadSettingsTarget = () => {
+        const ua = navigator.userAgent;
+        if (/Edg\//.test(ua)) return { browser: 'Edge', url: 'edge://settings/privacy' };
+        if (/OPR\//.test(ua)) return { browser: 'Opera', url: 'opera://settings/privacy' };
+        if (/Firefox\//.test(ua)) return { browser: 'Firefox', url: 'about:preferences#privacy' };
+        if (/Chrome\//.test(ua)) return { browser: 'Chrome', url: 'chrome://settings/security' };
+        return { browser: '', url: 'chrome://settings/security' };
+    };
+
+    // ai coding: 点击底部入口时复制对应浏览器的设置地址，因网页无法直接跳转 chrome:// 等内部页 2026/09/18: 19:57
+    const copyDownloadSettingsUrl = () => {
+        const { browser, url } = getDownloadSettingsTarget();
+        const done = () => showToast(`已复制${browser ? ' ' + browser : ''}设置地址，粘贴到地址栏打开`);
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(done).catch(() => fallbackCopy(url, done));
+        } else {
+            fallbackCopy(url, done);
+        }
+    };
+
     const showFullText = (text) => {
         const overlay = document.getElementById('full-text-overlay');
         const content = document.getElementById('overlay-content');
@@ -1181,6 +1303,53 @@
     document.addEventListener('DOMContentLoaded', () => {
         const fileInput = document.getElementById('file-input');
         fileInput.addEventListener('change', uploadFile);
+
+        // ai coding: 绑定底部“复制关闭下载拦截设置地址”入口的点击事件 2026/09/18: 19:57
+        const downloadHelpLink = document.getElementById('download-help-link');
+        downloadHelpLink.addEventListener('click', copyDownloadSettingsUrl);
+
+        // ai coding: 支持将文件拖拽到页面任意位置进行上传 2026/09/18: 19:39
+        const uploadZone = document.getElementById('upload-dropbox');
+        const dropOverlay = document.getElementById('drop-overlay');
+        // dragenter/dragleave 会在子元素间反复触发，用计数避免高亮闪烁。
+        let dragDepth = 0;
+
+        const isFileDrag = (event) => Array.from(event.dataTransfer?.types || []).includes('Files');
+
+        document.addEventListener('dragover', (event) => {
+            if (!isFileDrag(event)) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        });
+
+        document.addEventListener('dragenter', (event) => {
+            if (!isFileDrag(event)) return;
+            event.preventDefault();
+            dragDepth += 1;
+            uploadZone.classList.add('drag-active');
+            dropOverlay.classList.add('active');
+        });
+
+        document.addEventListener('dragleave', (event) => {
+            if (!isFileDrag(event)) return;
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) {
+                uploadZone.classList.remove('drag-active');
+                dropOverlay.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('drop', (event) => {
+            if (!isFileDrag(event)) return;
+            event.preventDefault();
+            dragDepth = 0;
+            uploadZone.classList.remove('drag-active');
+            dropOverlay.classList.remove('active');
+            const files = event.dataTransfer?.files;
+            if (files && files.length > 0) {
+                uploadFiles(files);
+            }
+        });
 
         // 允许在文本框中输入 Tab 键
         const textInput = document.getElementById('text-input');

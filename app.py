@@ -341,7 +341,8 @@ if __name__ == '__main__':
         Thread(target=open_browser, daemon=True).start()
 
     print(f"Server is running on {url}")
-    socketio.run(app, debug=True, host='0.0.0.0', port=port)
+    # ai coding: 兼容新版 Werkzeug，显式允许使用内置开发服务器 2026/09/07: 15:53
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
 
     
 

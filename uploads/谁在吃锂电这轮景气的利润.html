@@ -1,0 +1,320 @@
+<!-- 
+Intro: 谁在吃锂电这轮景气的利润
+  -->
+<!DOCTYPE html>
+<html lang="zh-Hans" data-mode="sepia"><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <base target="_blank">
+  <style type="text/css" id="ftp">html[data-mode="light"] {
+    color-scheme: light;
+    --fg: #222;
+    --bd: #222;
+    --bg: whitesmoke;
+  }
+  html[data-mode="dark"] {
+    color-scheme: dark;
+    --fg: #eee;
+    --bd: #eee;
+    --bg: #333;
+  }
+  html[data-mode="sepia"] {
+    color-scheme: light;
+    --fg: #5b4636;
+    --bd: #5b4636;
+    --bg: #f4ecd8;
+  }
+  html[data-mode="solarized-light"] {
+    color-scheme: light;
+    --fg: #586e75;
+    --bd: #586e75;
+    --bg: #fdf6e3;
+  }
+  html[data-mode="nord-light"] {
+    color-scheme: light;
+    --fg: #2e3440;
+    --bd: #2e3440;
+    --bg: #e5e9f0;
+  }
+  html[data-mode="groove-dark"] {
+    color-scheme: dark;
+    --fg: #cec4ac;
+    --bd: #cec4ac;
+    --bg: #282828
+  }
+  html[data-mode="solarized-dark"] {
+    color-scheme: dark;
+    --fg: #839496;
+    --bd: #839496;
+    --bg: #002b36;
+  }
+  html[data-mode="nord-dark"] {
+    color-scheme: dark;
+    --fg: #e5e9f0;
+    --bd: #e5e9f0;
+    --bg: #2e3440;
+  }</style>
+  <style>
+    :root {
+      --fg: #000; /* foreground  */
+      --bg: #fff; /* background  */
+      --bd: #000; /* border  */
+      --lk: #006fa5; /* link */
+      --lkv: #d33bf0; /* link visited */
+      --hg: #ffff81; /* highlight  */
+    }
+    html {
+      overflow: overlay;
+      scrollbar-color: var(--fg) var(--bg);
+    }
+    html[data-mode$="dark"] {
+      --lk: #0096de;
+    }
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      margin: 0 auto;
+      padding: 40px 20px;
+      max-width: 800px;
+      position: relative;
+      line-height: 1.8;
+      font-size: 18px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+      color: var(--fg);
+      border-color: var(--bd);
+      background-color: var(--bg);
+    }
+
+
+    @media print {
+      html[data-mode] {
+        --fg: #000;
+        --bd: #000;
+        --bg: #fff;
+
+        width: unset;
+        padding: 0;
+        margin: 0;
+      }
+    }
+    iframe,
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    img:not([width])[src$=".svg"] {
+      max-width: 100px;
+    }
+    body[data-images=false] canvas,
+    body[data-images=false] svg,
+    body[data-images=false] img {
+      display: none;
+    }
+    svg:not([width]):not([height]) {
+      max-width: 25vmin;
+    }
+    a {
+      color: var(--lk);
+      text-decoration: none;
+    }
+    a:visited {
+      color: var(--lkv);
+    }
+
+    hr {
+      background-color: var(--bd);
+      height: 1px;
+      border: 0;
+    }
+    #reader-domain {
+      display: none;
+    }
+    #reader-domain > span:nth-of-type(1) {
+      font-size: 1.1em;
+    }
+    #reader-domain > span:nth-of-type(2) {
+      font-size: 0.8em;
+    }
+    #reader-domain[data-mode="compact"] > span:nth-of-type(3) {
+      display: none
+    }
+    #reader-domain:not([data-mode="compact"]) > span:nth-of-type(1),
+    #reader-domain:not([data-mode="compact"]) > span:nth-of-type(2) {
+      display: none;
+    }
+
+    #reader-title {
+      font-size: 2.2em;
+      line-height: 1.3em;
+      width: 100%;
+      margin: 20px 0 10px 0;
+      padding: 0;
+      font-weight: 700;
+    }
+    #reader-credits,
+    #published-time,
+    #reader-estimated-time {
+      font-size: 0.9em;
+      line-height: 1.48em;
+      margin: 0 0 20px 0;
+      padding: 0;
+      color: #888;
+    }
+
+    #published-time:not(:empty)::before {
+      content: ' ⋮ ';
+    }
+    #doi-json {
+      overflow: hidden;
+    }
+    #doi-json code {
+      overflow: auto;
+      max-height: 400px;
+    }
+    #published-time:empty,
+    #reader-credits:empty {
+      display: none;
+    }
+    mark.hghlght {
+      background-color: var(--hg);
+    }
+    body:not([data-columns="1"]) .page :is(h1, h2) {
+      column-span: all;
+      background-color: rgba(125, 125, 125, 0.1);
+      padding: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    .page-separator {
+      background-color: rgba(125, 125, 125, 0.1);
+      padding-block: 2ch;
+      text-align: center;
+      font-size: medium;
+    }
+  </style>
+  <style id="user-css">body {
+  padding-bottom: 64px;
+}
+pre {
+  white-space: pre-wrap;
+}
+pre code {
+  background-color: #eff0f1;
+  color: #393318;
+  font-family: monospace;
+  display: block;
+  padding: 5px 10px;
+  overflow: hidden;
+}
+blockquote {
+  margin: 1.5em 0;
+  padding: 0.5em 1.5ch;
+  border-left: 4px solid #ccc;
+  color: #666;
+  font-style: italic;
+  background: rgba(0,0,0,0.02);
+}
+h-char, h-inner {
+  display: inline;
+}
+p {
+  margin-bottom: 1.5em;
+}
+hr {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+  margin: 2em 0;
+}
+body[data-mode="dark"] pre code {
+  background-color: #eff0f1;
+  color: #393318;
+}
+
+/* CSS for themes */
+html[data-mode=sepia] body { background-color: #f4ecd8; color: #5b4636; }
+html[data-mode=light] body { background-color: whitesmoke; color: #222; }
+html[data-mode=dark] body { background-color: #333; color: #eee; }</style>
+<title>谁在吃锂电这轮景气的利润 - 雪球</title></head>
+<body tabindex="1" data-images="false" data-font="poppins" data-columns="1">
+  <a id="reader-domain" data-mode="compact" href="https://xueqiu.com/7286533602/381805224"><button id="qr-button" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; background: transparent; padding: 0px; cursor: pointer;"><svg viewBox="0 0 256 256" style="width: 24px; fill: var(--fg); pointer-events: none;"><rect height="80" rx="16" width="80" x="40" y="40"></rect><rect height="80" rx="16" width="80" x="40" y="136"></rect><rect height="80" rx="16" width="80" x="136" y="40"></rect><path d="M144,184a8,8,0,0,0,8-8V144a8,8,0,0,0-16,0v32A8,8,0,0,0,144,184Z"></path><path d="M208,152H184v-8a8,8,0,0,0-16,0v56H144a8,8,0,0,0,0,16h32a8,8,0,0,0,8-8V168h24a8,8,0,0,0,0-16Z"></path><path d="M208,184a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V192A8,8,0,0,0,208,184Z"></path></svg></button>
+    <span>xueqiu.com</span>
+    <span>/7286533602/381805224</span>
+    <span>https://xueqiu.com/7286533602/381805224</span>
+  </a>
+  <h1 dir="auto" id="reader-title">谁在吃锂电这轮景气的利润</h1>
+  <span dir="auto" id="reader-credits">趋势de朋友 / 发布于2026-03-30 17:31 </span>
+  <hr>
+  <div id="readability-page-1" class="page"><div><p>好久没水长文了</p><p>很多人看今天的锂电产业<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>通常是从锂矿开始的<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>当然有人盯着锂矿<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>也有人盯着电解液<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>还有人盯着电池厂扩产<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>但如果把整条产业链放在一起看<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>就会发现<h-char unicode="ff0c"><h-inner>，</h-inner></h-char><b>利润最终流向哪里<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>往往不是由<h-char unicode="201c">“</h-char>谁更上游<h-char unicode="201d">”</h-char>决定的<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>而是由<h-char unicode="201c">“</h-char>谁在当下最紧<h-char unicode="201d">”</h-char>决定的<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p>换句话说<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>锂电链条的利润分配<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>本质上是一场围绕各环节供需缺口<h-char unicode="3001"><h-inner>、</h-inner></h-char>有效产能和议价权的动态博弈<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>这样也就更容易理解<h-char unicode="ff1a"><h-inner>：</h-inner></h-char><b>为什么有时候利润留在电池厂<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>有时候又会传导到电解液<h-char unicode="3001"><h-inner>、</h-inner></h-char>锂矿<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>甚至某个很小的添加剂品种上<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p>这一轮景气<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>先拉满的是需求<h-char unicode="3002"><h-inner>。</h-inner></h-char>而当前最紧的<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>却不是所有上游<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>而是电池厂的有效产能<h-char unicode="3002"><h-inner>。</h-inner></h-char>以宁德为例<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>2025年的锂电池产能772GW<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>产能利用率来到了96.9%<h-char unicode="3002"><h-inner>。</h-inner></h-char>动力电池系统毛利率23.84%<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>储能电池系统毛利率26.71%<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>充分利用产能稀缺获取了产业链的议价权<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>如果电池厂一直满负荷<h-char unicode="ff0c"><h-inner>，</h-inner></h-char><b>并且对上游的需求无法超过对应品种的的边际供给</b><h-char unicode="ff0c"><h-inner>，</h-inner></h-char>利润就会持续留在电池厂这一环<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>好消息是新增产能已经在路上<h-char unicode="ff1a"><h-inner>：</h-inner></h-char></b></p><p>公开信息显示<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>一批规模以上电池项目正在陆续投产或试产<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>比如<a href="https://xueqiu.com/S/SZ002594?from=status_stock_match">比亚迪</a>西咸16GWh<h-char unicode="3001"><h-inner>、</h-inner></h-char>厦门时代二期30GWh<h-char unicode="3001"><h-inner>、</h-inner></h-char>海辰菏泽30GWh<h-char unicode="3001"><h-inner>、</h-inner></h-char>鹏辉衢州36GWh<h-char unicode="3001"><h-inner>、</h-inner></h-char><a href="https://xueqiu.com/S/SZ300750?from=status_stock_match">宁德时代</a>匈牙利一期40GWh等<h-char unicode="3002"><h-inner>。</h-inner></h-char>新增名义产能已经相当可观<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>这意味着<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>随着Q2到Q4新增产能逐步释放<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>电池厂原本最强的紧平衡会边际缓和<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>一旦这个瓶颈松动<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>利润就会重新寻找新的停留位置<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p><b>利润会不会传导到电解液或锂矿<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>取决于谁会在下一阶段真正变成新的供给约束<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p>如果电池厂新增释放以后<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>电解液仍然是供大于求<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>那利润就很难大规模传导到电解液<h-char unicode="ff1b"><h-inner>；</h-inner></h-char>如果锂矿供给也并不紧<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>那利润也未必自然回到锂矿<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>只有当某个环节真正变成新的瓶颈<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>它才会重新拥有议价权<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p><b>还有一种情况<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>也会迅速改写利润分配<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>那就是外部扰动<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p><b>当一个品种本来就处在紧平衡附近时<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>一次短暂停产<h-char unicode="3001"><h-inner>、</h-inner></h-char>一次检修<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>甚至一次事故<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>都可能把价格平台整体抬上去<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p>VC就是典型例子<h-char unicode="3002"><h-inner>。</h-inner></h-char>因为2025年下半年龙头企业亘元的一次短期检修<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>VC价格快速上涨<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>并且涨上去之后并没有立刻大幅回调<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>这说明它本身就处在相对紧平衡的供需结构里<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>6F则不太一样<h-char unicode="3002"><h-inner>。</h-inner></h-char>六氟磷酸锂在2025年也经历过明显上涨<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>但进入2026年以后<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>随着开工率提升<h-char unicode="3001"><h-inner>、</h-inner></h-char>供应趋于宽松<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>价格又明显回落<h-char unicode="3002"><h-inner>。</h-inner></h-char>这说明6F更像是阶段性紧张<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>而不是长期硬瓶颈<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>所以<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>VC和6F的区别<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>不在于它们都属于电解液链条<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>而在于它们的供需结构不一样<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p>前者更容易在外力冲击后维持高位<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>后者则更容易在供给恢复后回吐涨幅<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>可以把锂电这轮行情理解成一句话<h-char unicode="ff1a"><h-inner>：</h-inner></h-char></b><br><b>利润永远追着瓶颈走<h-char unicode="3002"><h-inner>。</h-inner></h-char></b></p><p>当前瓶颈在电池厂<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>因为需求很强<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>而电池厂有效产能接近满负荷<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>所以这一阶段电池厂拿走了更多利润<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>也拥有更强的上下游议价权<h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>但瓶颈不是一成不变的<h-char unicode="3002"><h-inner>。</h-inner></h-char></b><br><b>随着2026年新增产能陆续释放<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>电池环节的紧张会逐渐缓和<h-char unicode="3002"><h-inner>。</h-inner></h-char>到了那时<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>利润会不会继续向电解液<h-char unicode="3001"><h-inner>、</h-inner></h-char>锂盐<h-char unicode="3001"><h-inner>、</h-inner></h-char>锂矿传导<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>取决于谁会成为下一个供给最紧的地方</b><h-char unicode="3002"><h-inner>。</h-inner></h-char></p><p><b>因此<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>锂电产业链里真正重要的<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>是相对稀缺性<h-char unicode="3002"><h-inner>。</h-inner></h-char></b><br><b>价格也不只是成本的反映<h-char unicode="ff0c"><h-inner>，</h-inner></h-char>更是稀缺性的定价<h-char unicode="3002"><h-inner>。</h-inner></h-char><a href="https://xueqiu.com/S/SZ002460" target="_blank">$赣锋锂业(SZ002460)$</a> <a href="https://xueqiu.com/S/SZ002738" target="_blank">$中矿资源(SZ002738)$</a></b></p></div></div>
+  <span></span> <!-- for IntersectionObserver -->
+  
+  
+  
+  
+
+
+<style id="note-styling">
+    .note {
+      position: absolute;
+      z-index: 10;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: inherit;
+      padding: 5px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+    .note:focus {
+      z-index: 11;
+    }
+    .note[type="0"] {
+      background-color: #fff740;
+      color: #2c2c2d;
+    }
+    .note[type="0"]::placeholder {
+      color: #868226;
+    }
+    .note[type="1"] {
+      background-color: #feff9c;
+      color: #2c2c2d;
+    }
+    .note[type="1"]::placeholder {
+      color: #6d6d3d;
+    }
+    .note[type="2"] {
+      background-color: #ff65a3;
+      color: #2c2c2d;
+    }
+    .note[type="2"]::placeholder {
+      color: #65263f;
+    }
+    .note[type="3"] {
+      background-color: #ff7eb9;
+      color: #2c2c2d;
+    }
+    .note[type="3"]::placeholder {
+      color: #562b3f;
+    }
+    .note[type="4"] {
+      background-color: #7afcff;
+      color: #295c5d;
+    }
+    .note[type="4"]::placeholder {
+      color: #377677;
+    }</style></body><style>body {
+      font-size:  22px;
+      font-family: Poppins, sans-serif;
+      width: min(100% - 2rem, 1000px);
+    }
+    p {
+      text-align: justify
+    }
+    .page {
+      line-height: 33.0px;
+      column-count: unset;
+    }
+    h1, h2, h3 {
+      line-height: initial;
+    }</style></html>
