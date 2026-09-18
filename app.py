@@ -341,8 +341,8 @@ if __name__ == '__main__':
         Thread(target=open_browser, daemon=True).start()
 
     print(f"Server is running on {url}")
-    # ai coding: 兼容新版 Werkzeug，显式允许使用内置开发服务器 2026/09/07: 15:53
-    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+    # ai coding: 关闭 debug 调试中间件（use_reloader 保留自动重载），避免 Werkzeug 下 simple-websocket 正常结束连接时抛出的 ConnectionError 被调试中间件误判为 500 并打印堆栈；同时兼容新版 Werkzeug 显式允许内置开发服务器 2026/09/18: 20:33
+    socketio.run(app, debug=False, use_reloader=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
 
     
 
