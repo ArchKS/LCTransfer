@@ -51,9 +51,9 @@
             --toast-fg: #ffffff;
             --drop-bg: rgba(6, 7, 11, 0.55);
             --qrcode-bg: #ffffff;
-            /* ai coding: 太极切换按钮的阴阳双色（暗色皮肤下黑色占多数） 2026/09/18: 21:20 */
-            --taiji-dark: #05060a;
-            --taiji-light: #f4f5f8;
+            /* ai coding: 太极阴阳双色（半透明磨砂玻璃质感） 2026/09/18: 21:29 */
+            --taiji-dark: rgba(7, 9, 15, 0.86);
+            --taiji-light: rgba(244, 245, 248, 0.9);
             --aurora:
                 radial-gradient(38% 38% at 18% 22%, rgba(255, 90, 95, 0.35), transparent 70%),
                 radial-gradient(34% 34% at 82% 16%, rgba(64, 110, 255, 0.35), transparent 70%),
@@ -87,9 +87,9 @@
             --toast-fg: #ffffff;
             --drop-bg: rgba(255, 255, 255, 0.45);
             --qrcode-bg: #ffffff;
-            /* ai coding: 太极切换按钮的阴阳双色（亮色皮肤下白色占多数） 2026/09/18: 21:20 */
-            --taiji-dark: #1c1c1e;
-            --taiji-light: #ffffff;
+            /* ai coding: 太极阴阳双色（半透明磨砂玻璃质感） 2026/09/18: 21:29 */
+            --taiji-dark: rgba(24, 24, 28, 0.84);
+            --taiji-light: rgba(255, 255, 255, 0.94);
             --aurora:
                 radial-gradient(38% 38% at 18% 22%, rgba(255, 138, 128, 0.55), transparent 70%),
                 radial-gradient(34% 34% at 82% 16%, rgba(112, 182, 255, 0.55), transparent 70%),
@@ -144,34 +144,36 @@
             body::before { animation: none; }
         }
 
-        /* ai coding: 右上角黑白皮肤切换按钮（扁平样式，与整页按钮一致） 2026/09/18: 20:56 */
+        /* ai coding: 太极切换按钮移到容器左下角并做成液态磨砂玻璃；默认黑上白下，亮色皮肤旋转 180° 2026/09/18: 21:29 */
         .theme-toggle {
             position: fixed;
-            top: 18px;
-            right: 18px;
+            left: 18px;
+            bottom: 18px;
             z-index: 3000;
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
             color: var(--ink-strong);
             background: var(--glass-bg-strong);
             border: 1px solid var(--glass-border);
             border-radius: 999px;
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+            box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
             cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
         .theme-toggle:hover {
             background: var(--btn-bg-hover);
-            color: var(--accent);
             border-color: var(--accent-soft);
+            box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight), 0 0 0 4px var(--accent-soft);
         }
 
-        /* ai coding: 太极图标——点击整圈旋转，暗色皮肤黑色占多数、亮色皮肤白色占多数 2026/09/18: 21:20 */
+        /* ai coding: 阴阳双鱼用半透明填色，叠加按钮的磨砂模糊形成液态玻璃质感 2026/09/18: 21:29 */
         .taiji-spin {
             display: inline-flex;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -179,8 +181,8 @@
 
         .taiji {
             display: block;
-            width: 26px;
-            height: 26px;
+            width: 30px;
+            height: 30px;
         }
 
         .taiji .tj-dark {
@@ -191,20 +193,10 @@
             fill: var(--taiji-light);
         }
 
-        .taiji--light {
-            display: none;
-        }
-
-        html[data-theme="dark"] .taiji--dark {
-            display: block;
-        }
-
-        html[data-theme="light"] .taiji--dark {
-            display: none;
-        }
-
-        html[data-theme="light"] .taiji--light {
-            display: block;
+        .taiji .tj-rim {
+            fill: none;
+            stroke: var(--glass-highlight);
+            stroke-width: 2;
         }
 
         /* 主玻璃面板 */
@@ -1012,33 +1004,20 @@
     <!-- ai coding: 右上角黑白皮肤切换按钮 2026/09/18: 20:56 -->
     <button id="theme-toggle" class="theme-toggle" type="button" title="切换黑白皮肤" aria-label="切换黑白皮肤">
         <span id="theme-toggle-icon" class="taiji-spin">
-            <!-- 暗色皮肤：黑色占多数的太极 -->
-            <svg class="taiji taiji--dark" viewBox="0 0 100 100" aria-hidden="true">
+            <!-- 默认（暗色皮肤）：黑色在上、白色在下；亮色皮肤时整体旋转 180° 变为白色在上 -->
+            <svg class="taiji" viewBox="0 0 100 100" aria-hidden="true">
                 <defs>
-                    <clipPath id="taiji-clip-dark"><circle cx="50" cy="50" r="50" /></clipPath>
+                    <clipPath id="taiji-clip"><circle cx="50" cy="50" r="50" /></clipPath>
                 </defs>
-                <g clip-path="url(#taiji-clip-dark)">
+                <g clip-path="url(#taiji-clip)">
                     <rect class="tj-light" x="0" y="0" width="100" height="100" />
-                    <rect class="tj-dark" x="0" y="0" width="50" height="100" />
-                    <circle class="tj-dark" cx="50" cy="68" r="32" />
-                    <circle class="tj-light" cx="50" cy="18" r="18" />
-                    <circle class="tj-dark" cx="50" cy="18" r="5" />
-                    <circle class="tj-light" cx="50" cy="68" r="5" />
+                    <rect class="tj-dark" x="0" y="0" width="100" height="50" />
+                    <circle class="tj-light" cx="25" cy="50" r="25" />
+                    <circle class="tj-dark" cx="75" cy="50" r="25" />
+                    <circle class="tj-dark" cx="25" cy="50" r="6" />
+                    <circle class="tj-light" cx="75" cy="50" r="6" />
                 </g>
-            </svg>
-            <!-- 亮色皮肤：白色占多数的太极 -->
-            <svg class="taiji taiji--light" viewBox="0 0 100 100" aria-hidden="true">
-                <defs>
-                    <clipPath id="taiji-clip-light"><circle cx="50" cy="50" r="50" /></clipPath>
-                </defs>
-                <g clip-path="url(#taiji-clip-light)">
-                    <rect class="tj-light" x="0" y="0" width="100" height="100" />
-                    <rect class="tj-dark" x="0" y="0" width="50" height="100" />
-                    <circle class="tj-dark" cx="50" cy="82" r="18" />
-                    <circle class="tj-light" cx="50" cy="32" r="32" />
-                    <circle class="tj-dark" cx="50" cy="32" r="5" />
-                    <circle class="tj-light" cx="50" cy="82" r="5" />
-                </g>
+                <circle class="tj-rim" cx="50" cy="50" r="49" />
             </svg>
         </span>
     </button>
@@ -1707,21 +1686,26 @@
         });
     });
 
-    // ai coding: 太极按钮切换黑白皮肤，每次点击旋转一圈并写入 localStorage 2026/09/18: 21:20
+    // ai coding: 太极按钮切换黑白皮肤，亮色皮肤时旋转 180°（黑上白下 → 白上黑下）并写入 localStorage 2026/09/18: 21:29
     (function () {
         const root = document.documentElement;
         const toggle = document.getElementById('theme-toggle');
         const icon = document.getElementById('theme-toggle-icon');
-        let rotation = 0;
+        let rotation = root.getAttribute('data-theme') === 'light' ? 180 : 0;
+
+        // 首屏直接落到对应角度，不播放旋转动画
+        icon.style.transition = 'none';
+        icon.style.transform = 'rotate(' + rotation + 'deg)';
+        requestAnimationFrame(() => { icon.style.transition = ''; });
 
         const syncTitle = () => {
             toggle.title = root.getAttribute('data-theme') === 'light' ? '切换到暗色皮肤' : '切换到亮色皮肤';
         };
 
         toggle.addEventListener('click', () => {
-            rotation += 360;
-            icon.style.transform = 'rotate(' + rotation + 'deg)';
             const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            rotation += 180;
+            icon.style.transform = 'rotate(' + rotation + 'deg)';
             root.setAttribute('data-theme', next);
             localStorage.setItem('lct-theme', next);
             syncTitle();
