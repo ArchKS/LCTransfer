@@ -146,9 +146,7 @@
 
         /* ai coding: 太极切换按钮移到容器左下角并做成液态磨砂玻璃；默认黑上白下，亮色皮肤旋转 180° 2026/09/18: 21:29 */
         .theme-toggle {
-            position: fixed;
-            left: 18px;
-            bottom: 18px;
+            position: static;
             z-index: 3000;
             width: 46px;
             height: 46px;
@@ -623,6 +621,13 @@
             padding: 4px;
         }
 
+        /* ai coding: 太极按钮作为 qrcode-box 的项，底部对齐且推到最左（左下角） 2026/09/20: 09:09 */
+        .qrcode-box .theme-toggle {
+            align-self: flex-end;
+            margin-right: auto;
+            margin-left: 4px;
+        }
+
         @media (max-width: 600px) {
             .footer-tools {
                 display: none !important;
@@ -1001,26 +1006,6 @@
 </head>
 
 <body>
-    <!-- ai coding: 右上角黑白皮肤切换按钮 2026/09/18: 20:56 -->
-    <button id="theme-toggle" class="theme-toggle" type="button" title="切换黑白皮肤" aria-label="切换黑白皮肤">
-        <span id="theme-toggle-icon" class="taiji-spin">
-            <!-- 默认（暗色皮肤）：黑色在上、白色在下；亮色皮肤时整体旋转 180° 变为白色在上 -->
-            <svg class="taiji" viewBox="0 0 100 100" aria-hidden="true">
-                <defs>
-                    <clipPath id="taiji-clip"><circle cx="50" cy="50" r="50" /></clipPath>
-                </defs>
-                <g clip-path="url(#taiji-clip)">
-                    <rect class="tj-light" x="0" y="0" width="100" height="100" />
-                    <rect class="tj-dark" x="0" y="0" width="100" height="50" />
-                    <circle class="tj-light" cx="25" cy="50" r="25" />
-                    <circle class="tj-dark" cx="75" cy="50" r="25" />
-                    <circle class="tj-dark" cx="25" cy="50" r="6" />
-                    <circle class="tj-light" cx="75" cy="50" r="6" />
-                </g>
-                <circle class="tj-rim" cx="50" cy="50" r="49" />
-            </svg>
-        </span>
-    </button>
     <div id="toast-container"></div>
     <!-- ai coding: 拖拽文件到页面时显示的全屏提示层 2026/09/18: 19:39 -->
     <div id="drop-overlay"><span>松开鼠标即可上传文件</span></div>
@@ -1086,6 +1071,26 @@
                     <p style="font-size: 14px;"><strong>连接提示：</strong><br>确保手机与电脑处于同一局域网下，即可通过右侧二维码或当前网页地址访问此站点。</p>
                 </div>
                 <div class="qrcode-box" style="display: flex; align-items: stretch;">
+                    <!-- ai coding: 皮肤切换太极按钮放入 qrcode-box，置于该容器左下角 2026/09/20: 09:09 -->
+                    <button id="theme-toggle" class="theme-toggle" type="button" title="切换黑白皮肤" aria-label="切换黑白皮肤">
+                        <span id="theme-toggle-icon" class="taiji-spin">
+                            <!-- 默认（暗色皮肤）：黑色在上、白色在下；亮色皮肤时整体旋转 180° 变为白色在上 -->
+                            <svg class="taiji" viewBox="0 0 100 100" aria-hidden="true">
+                                <defs>
+                                    <clipPath id="taiji-clip"><circle cx="50" cy="50" r="50" /></clipPath>
+                                </defs>
+                                <g clip-path="url(#taiji-clip)">
+                                    <rect class="tj-light" x="0" y="0" width="100" height="100" />
+                                    <rect class="tj-dark" x="0" y="0" width="100" height="50" />
+                                    <circle class="tj-light" cx="25" cy="50" r="25" />
+                                    <circle class="tj-dark" cx="75" cy="50" r="25" />
+                                    <circle class="tj-dark" cx="25" cy="50" r="6" />
+                                    <circle class="tj-light" cx="75" cy="50" r="6" />
+                                </g>
+                                <circle class="tj-rim" cx="50" cy="50" r="49" />
+                            </svg>
+                        </span>
+                    </button>
                     <div id="ip-list" class="ip-list-container">
                         <!-- IP addresses will be listed here -->
                     </div>
