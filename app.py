@@ -12,6 +12,11 @@ import sys
 import uuid
 import re
 
+# ai coding: 引入附件响应和临时文件 ZIP 打包所需模块 2026/11/03: 14:43
+from flask import send_file
+from tempfile import TemporaryFile
+from zipfile import ZipFile, ZIP_DEFLATED
+
 # 处理 PyInstaller 资源路径
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -53,6 +58,39 @@ def index():
 @app.route('/download/<path:filename>', methods=['GET'])
 def download_file(filename):
     return send_from_directory(directory=Path(app.config['UPLOAD_FOLDER']), path=filename, as_attachment=True)
+
+
+# ai coding: 将归档目录全部文件按原名打包下载，使用临时文件限制内存并处理空目录及打包失败 2026/11/03: 14:43
+@app.route('/download_all', methods=['GET'])
+def download_all_files():
+    archive_file = TemporaryFile()
+    try:
+        files = sorted(path for path in Path(app.config['UPLOAD_FOLDER']).iterdir() if path.is_file())
+        if not files:
+            archive_file.close()
+            return jsonify(success=False, error='没有可下载的文件'), 404
+
+        with ZipFile(archive_file, 'w', compression=ZIP_DEFLATED, allowZip64=True) as archive:
+            for filepath in files:
+                archive.write(filepath, arcname=filepath.name)
+
+        archive_size = archive_file.tell()
+        archive_file.seek(0)
+        response = send_file(
+            archive_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f"LCTransfer_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
+            max_age=0,
+        )
+        response.content_length = archive_size
+        response.headers['Cache-Control'] = 'no-store'
+        response.call_on_close(archive_file.close)
+        return response
+    except Exception:
+        archive_file.close()
+        app.logger.exception('Failed to create download archive')
+        return jsonify(success=False, error='文件打包失败，请刷新列表后重试'), 500
 
 
 @app.route('/list_files', methods=['GET'])

@@ -555,6 +555,36 @@
             transform: translateX(0) scale(1);
         }
 
+        /* ai coding: 文件标题和操作按钮支持窄屏换行，并为无文件时的下载按钮提供禁用样式 2026/11/03: 14:43 */
+        .file-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .file-section-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .file-section-actions .copy-btn {
+            height: 32px;
+            padding: 0 15px;
+        }
+
+        #download-all-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: var(--btn-bg);
+            color: var(--accent);
+            border-color: var(--accent-soft);
+        }
+
         /* 文件列表 */
         #file-list {
             list-style: none;
@@ -1052,10 +1082,15 @@
 
             <!-- 文件归档 -->
             <section class="section-card">
-                <!-- ai coding: 标题右侧放“清除全部”，下方改为支持点击与拖拽的上传框 2026/09/18: 19:45 -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <!-- ai coding: 文件归档标题右侧增加下载全部 ZIP 的按钮，并保留清除全部操作 2026/11/03: 14:43 -->
+                <div class="file-section-header">
                     <h3 style="margin: 0;">文件归档</h3>
-                    <button id="delete-button" class="copy-btn btn-red" style="height: 32px; padding: 0 15px;">清除全部</button>
+                    <div class="file-section-actions">
+                        <form action="/download_all" method="get">
+                            <button id="download-all-button" type="submit" class="copy-btn" title="将全部归档文件打包为 ZIP 下载" disabled>下载全部</button>
+                        </form>
+                        <button id="delete-button" class="copy-btn btn-red">清除全部</button>
+                    </div>
                 </div>
                 <div id="upload-dropbox" class="upload-dropbox" style="margin-bottom: 15px;">
                     <div class="upload-dropbox-icon"><i class="fas fa-cloud-upload-alt"></i></div>
@@ -1133,6 +1168,11 @@
         const response = await fetch('/list_files');
         const files = await response.json();
         const fileList = document.getElementById('file-list');
+
+        // ai coding: 文件列表刷新时同步下载全部按钮状态，空列表禁止下载 2026/11/03: 14:43
+        const downloadAllButton = document.getElementById('download-all-button');
+        downloadAllButton.disabled = files.length === 0;
+        downloadAllButton.title = files.length === 0 ? '没有可下载的文件' : `下载全部 ${files.length} 个文件（ZIP）`;
 
         fileList.innerHTML = '';
 
